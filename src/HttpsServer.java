@@ -24,7 +24,7 @@ public class HttpsServer extends Thread {
 	    ServerSocketFactory ssf = SSLServerSocketFactory.getDefault();
             ServerSocket serverSocket = ssf.createServerSocket(Integer.parseInt(arrInput[1]));
 
-	    SSLContext sslc = SSLContext.getInstance("TLS");	  
+/*	    SSLContext sslc = SSLContext.getInstance("TLS");	  
 	    char [] pswd = "testing".toCharArray();
 	    KeyStore ks = KeyStore.getInstance("JKS");
 	    FileInputStream fin = new FileInputStream(ks);
@@ -33,7 +33,7 @@ public class HttpsServer extends Thread {
 	    TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
 	    tmf.init(ks);
 	    sslc.init(kmf.getKeyManagers(),tmf.getTrustManagers(), new SecureRandom());
-
+*/
 	    while (true) {
 	    	new HttpsServer(serverSocket.accept()).start();
 	    }
