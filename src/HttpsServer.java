@@ -37,38 +37,21 @@ public class HttpsServer extends Thread {
         SSLServerSocket serverSocket;
         serverSocket = (SSLServerSocket) sslf.createServerSocket(Integer.parseInt(arrPortDetails[0]));
 
+        ServerSocket httpServerSocket;
+        httpServerSocket = new ServerSocket(Integer.parseInt(arrPortDetails[1]));
+
+
         while (true) {
-            //////////SECURE/////////////////
-	    	if (false){
-                new HttpsServer(serverSocket.accept(), true).start();
-            }
-            /////////NOT SECURE//////////////
-            else{
-                ServerSocket httpServerSocket = new ServerSocket(Integer.parseInt(arrPortDetails[1]));
-
-                //Socket clientSocket;
-                //clientSocket = httpServerSocket.accept();
-
-                new HttpsServer(httpServerSocket.accept(), true).start();
-
-                //read in top line, if empty then wait for user request
-                //String strInput = in.readLine();
-                //if (strInput.isEmpty()){ continue; }
-
-
-            }
-
-
-
-	    }
+            //create Secure socket
+            new HttpsServer(serverSocket.accept()).start();
+            //create regular socket
+            new HttpsServer(httpServerSocket.accept()).start();
+  	    }
    }
 
-    private Socket reg;   //regular socket
-	private Socket ssl;   //ssl socket
-    //currently always true
-    public HttpsServer(Socket s, boolean bSecure) {
-        if (bSecure){ssl = s;}
-        else{ reg = s; }
+	private Socket ssl;
+    public HttpsServer(Socket s) {
+        ssl = s;
     }
 
 
