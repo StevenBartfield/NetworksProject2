@@ -10,6 +10,7 @@ import javax.net.*;
 import javax.net.ssl.*;
 
 
+
 public class HttpsServer extends Thread {
 
     public static void main(String[] args) throws Exception {
@@ -21,19 +22,28 @@ public class HttpsServer extends Thread {
 
 
             //ServerSocket serverSocket = new ServerSocket(Integer.parseInt(arrInput[1]));
-	    ServerSocketFactory ssf = SSLServerSocketFactory.getDefault();
-            ServerSocket serverSocket = ssf.createServerSocket(Integer.parseInt(arrInput[1]));
+	    //ServerSocketFactory ssf = SSLServerSocketFactory.getDefault();
+        //ServerSocket serverSocket = ssf.createServerSocket(Integer.parseInt(arrInput[1]));
 
-/*	    SSLContext sslc = SSLContext.getInstance("TLS");	  
+
+
+
+	    SSLContext sslc = SSLContext.getInstance("TLS");
 	    char [] pswd = "testing".toCharArray();
 	    KeyStore ks = KeyStore.getInstance("JKS");
-	    FileInputStream fin = new FileInputStream(ks);
+
+	    FileInputStream fin = new FileInputStream("server.jks");
 	    ks.load(fin,pswd);
-	    KeyManagerFactor kmf = KeyManagerFactory.getInstance("SunX509");
+	    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
 	    TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
 	    tmf.init(ks);
 	    sslc.init(kmf.getKeyManagers(),tmf.getTrustManagers(), new SecureRandom());
-*/
+
+        SSLServerSocketFactory sslf = sslc.getServerSocketFactory();
+
+        ServerSocket serverSocket = sslf.createServerSocket(Integer.parseInt(arrInput[1]));
+
+
 	    while (true) {
 	    	new HttpsServer(serverSocket.accept()).start();
 	    }
