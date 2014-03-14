@@ -2,69 +2,80 @@
  *Steven Bartfield and Rehan Balagamwala- MPCS 54001 - Project 1
  ****************/
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.security.KeyStore;
 import java.util.Scanner;
-import java.net.*;
-import java.security.*;
-import javax.net.*;
-import javax.net.ssl.*;
 
-
-
-public class HttpsServer extends Thread {
+public class Server {
 
     public static void main(String[] args) throws Exception {
 
         //------------------------------------------------------------------------------
         //Setting up the sockets and defining variables
         //------------------------------------------------------------------------------
-        String[] arrInput = args[0].split("=");            //parse out the port number
-        //String[] arrInputSSL = args[1].split("=");            //parse out the port number
+        String[] arrInput = null;
+        String[] arrInputSecure = null;
 
-        //blah blah.accept(); //http
-        //https
+        //http = 80, https = 443 usually..
 
-
-
-        //Runs the HTTPs server stuff.
-	    SSLContext sslc = SSLContext.getInstance("TLS");
-	    char [] pswd = "testing".toCharArray();
-	    KeyStore ks = KeyStore.getInstance("JKS");
-	    FileInputStream fin = new FileInputStream("server.jks");
-	    ks.load(fin,pswd);
-	    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-	    kmf.init(ks, pswd);
-        sslc.init(kmf.getKeyManagers(), null, null);
-        SSLServerSocketFactory sslf = sslc.getServerSocketFactory();
-        SSLServerSocket serverSocket;
-        serverSocket = (SSLServerSocket) sslf.createServerSocket(Integer.parseInt(arrInput[1]));
+        try{
+            arrInput = args[0].split("=");             //parse out the regular port number
+            //arrInputSecure = args[1].split("=");             //parse out the SSL port number
+        }catch(Exception e){
+            System.out.println(e.getStackTrace());
+        }
 
 
+        while (true){    //will continue to look for requests
+
+            BufferedReader in = null;
+            ServerSocket serverSocket = null;
+            DataOutputStream out = null;
+            Socket clientSocket = null;
+
+            //if request is https, then do this
+            try{
+                SSLContext sslc = SSLContext.getInstance("TLS");
+                char [] pswd = "testing".toCharArray();
+                KeyStore ks = KeyStore.getInstance("JKS");
+                FileInputStream fin = new FileInputStream("server.jks");
+                ks.load(fin,pswd);
+                KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+                kmf.init(ks, pswd);
+                sslc.init(kmf.getKeyManagers(), null, null);
+                SSLServerSocketFactory sslf = sslc.getServerSocketFactory();
+                SSLServerSocket sslServerSocket;
+                sslServerSocket = (SSLServerSocket) sslf.createServerSocket(Integer.parseInt(arrInput[1]));
+
+                Socket ssl = sslServerSocket.accept();
+
+                in = new BufferedReader(new InputStreamReader(ssl.getInputStream()));
+                out = new DataOutputStream(ssl.getOutputStream());
+
+                System.out.println(ssl.getInputStream());
 
 
+            }catch (Exception e){
+
+                serverSocket = new ServerSocket(Integer.parseInt(arrInput[1]));
+                clientSocket = serverSocket.accept();
+                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                out = new DataOutputStream(clientSocket.getOutputStream());
+            }
 
 
-	    while (true) {
-	    	new HttpsServer(serverSocket.accept()).start();
-	    }
-   }
-
-	private Socket ssl;
-    public HttpsServer(Socket s) {
-        ssl = s;
-    }
-
-	public void run() {
-
-	  try{
-            BufferedReader in = new BufferedReader(new InputStreamReader(ssl.getInputStream()));
-            DataOutputStream out = new DataOutputStream(ssl.getOutputStream());
 
             //read in top line, if empty then wait for user request
             String strInput = in.readLine();
-            //if (strInput.isEmpty()){ 
-	        //	continue; }
+            if (strInput.isEmpty()){ continue; }
 
+            System.out.println(strInput);
 
             //------------------------------------------------------------------------------
             //Parsing out request and building the header file
@@ -80,6 +91,16 @@ public class HttpsServer extends Thread {
             }
             if (strRequestType.equals("HEAD")){
                 strPath = strInput.substring(6, strInput.indexOf("HTTP") - 1);
+            }
+
+            //FOR TEST PURPOSES ONLY - Too shutdown server without killing port ("http....edu/####/QUIT")
+            if (strPath.equals("QUIT")){
+                System.err.println("Connection terminated");
+                out.close();
+                in.close();
+                clientSocket.close();
+                serverSocket.close();
+                return;
             }
 
             //Create the header and send back to client
@@ -105,19 +126,13 @@ public class HttpsServer extends Thread {
                     //Transmit the data to client
                     out.write(bytFile, 0, nByteSize);
                 }catch(Exception e){
-                    out.writeBytes("404. That's an Error! The requested URL was not found on this server. That's all we know.\r\n"); //for 404 requests //find out what should actually be written in the body for 404s.. if anything?
+                    out.writeBytes("No File!\r\n"); //for 404 requests //find out what should actually be written in the body for 404s.. if anything?
                 }
             }
 
             //Remove the rest of client's header from the buffer
             while ( (strInput = in.readLine()) != null){
-                //System.out.println(strInput); //printing out full request for debug purposes
-		if (strHeader.contains("Connection: keep-alive")){
-			continue;	
-		}
-
-
-                if (strInput.equals("") ){ break;} //breaks once the current request has ended
+                System.out.println(strInput); //printing out full request for debug purposes
             }
 
             //------------------------------------------------------------------------------
@@ -126,13 +141,9 @@ public class HttpsServer extends Thread {
 
             out.close();
             in.close();
-            ssl.close(); 
-	  } catch (IOException ioe) {
-                        //close connection
-                }
-
+            serverSocket.close();
         }
-    
+    }
 
     //------------------------------------------------------------------------------
     //Methods to help build appropriate headers
@@ -164,19 +175,19 @@ public class HttpsServer extends Thread {
             return strHeader;
         }
 
-
         //check if file exists, if not then send 404
         if (!fileRequested.exists()){
             strHeader =  "HTTP/1.1 404 Not Found \r\n";
-            strHeader += "Content-Length: 91 \r\n";
-            strHeader += "Content-Type: text/html \r\n";
+            strHeader += "Content-Length: 10 \r\n";   //MUST CORRESPOND TO WHAT EVER IS SENT IN CATCH CLAUSE -- ADJUST ACCORDINGLY
+            strHeader += "Content-Type: text/html \r\n";  //does this even matter?
             return strHeader;
         }
 
-        //for paths that exist(redirect to be coded in future)
+        //for paths that exist (redirect to be coded in future)
         strHeader =  "HTTP/1.1 200 OK \r\n";
         strHeader += "Content-Length: " + fileRequested.length() + "\r\n";
         strHeader += "Content-Type: " + findContentType(strPathInput) + "\r\n";
+        strHeader += "Connection: Keep-Alive" + "\r\n";
         return strHeader;
     }
 
@@ -186,7 +197,7 @@ public class HttpsServer extends Thread {
         String strContentType = ""; //initialize the variable
         if      (strPathInput.endsWith("html")){strContentType = "text/html";}
         else if (strPathInput.endsWith("txt")){strContentType = "text/plain";}
-        else if (strPathInput.endsWith("jpeg")){strContentType = "image/jpeg";}
+        else if (strPathInput.endsWith("jpeg")){strContentType = "image/jpeg";}  //do we need to do jpg?
         else if (strPathInput.endsWith("png")){strContentType = "image/html";}
         else if (strPathInput.endsWith("pdf")){strContentType = "application/pdf";}
         else if (strPathInput.endsWith("exe")){strContentType = "application/octet-stream";} //need to look into
@@ -196,12 +207,9 @@ public class HttpsServer extends Thread {
     //Checks to see if requested path is a redirect, if so returns redirect path
     public static String findRedirect(String strPathInput){
         String strRedirectPath = "";
-        Scanner scanRedirect;
-        try {scanRedirect = new Scanner(new File("redirect.defs")); }
-        catch(IOException e){
-            System.out.println("redirect.defs file could not be found" + e.getMessage());
-            return strRedirectPath; //send empty string (could not find file)
-        }   //only works if server in root
+        Scanner scanRedirect = null;
+        try {scanRedirect = new Scanner(new File("www/redirect.defs")); }
+        catch(IOException e){System.out.println("redirect.defs file could not be found" + e.getMessage());}   //only works if server in root
 
         while (scanRedirect.hasNextLine()){
             String strRedirect = scanRedirect.nextLine();
