@@ -35,13 +35,17 @@ public class HttpsServer extends Thread {
 	    FileInputStream fin = new FileInputStream("server.jks");
 	    ks.load(fin,pswd);
 	    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-	    TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-	    tmf.init(ks);
-	    sslc.init(kmf.getKeyManagers(),tmf.getTrustManagers(), new SecureRandom());
+
+//	    TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+//	    tmf.init(ks);
+	    kmf.init(ks, pswd);
+        sslc.init(kmf.getKeyManagers(), null, null);
 
         SSLServerSocketFactory sslf = sslc.getServerSocketFactory();
+        //ServerSocket serverSocket = sslf.createServerSocket(Integer.parseInt(arrInput[1]));
 
-        ServerSocket serverSocket = sslf.createServerSocket(Integer.parseInt(arrInput[1]));
+        SSLServerSocket serverSocket;
+        serverSocket = (SSLServerSocket) sslf.createServerSocket(Integer.parseInt(arrInput[1]));
 
 
 	    while (true) {
