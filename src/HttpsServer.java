@@ -10,7 +10,6 @@ import javax.net.*;
 import javax.net.ssl.*;
 
 
-
 public class HttpsServer extends Thread {
 
     public static void main(String[] args) throws Exception {
@@ -18,51 +17,70 @@ public class HttpsServer extends Thread {
         //------------------------------------------------------------------------------
         //Setting up the sockets and defining variables
         //------------------------------------------------------------------------------
-        String[] arrInput = args[0].split("=");            //parse out the port number
-        //String[] arrInputSSL = args[1].split("=");            //parse out the port number
+        String[] arrInputOne = args[0].split("=");            //parse out the port number
+        String[] arrInputTwo = args[1].split("=");            //parse out the port number
 
-        //blah blah.accept(); //http
-        //https
-
-
+        //SSL = [0], Regular = [1]
+        String[] arrPortDetails = findPortNumbers(arrInputOne, arrInputTwo);
 
         //Runs the HTTPs server stuff.
-	    SSLContext sslc = SSLContext.getInstance("TLS");
-	    char [] pswd = "testing".toCharArray();
-	    KeyStore ks = KeyStore.getInstance("JKS");
-	    FileInputStream fin = new FileInputStream("server.jks");
-	    ks.load(fin,pswd);
-	    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-	    kmf.init(ks, pswd);
+        SSLContext sslc = SSLContext.getInstance("TLS");
+        char [] pswd = "testing".toCharArray();
+        KeyStore ks = KeyStore.getInstance("JKS");
+        FileInputStream fin = new FileInputStream("server.jks");
+        ks.load(fin,pswd);
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+        kmf.init(ks, pswd);
         sslc.init(kmf.getKeyManagers(), null, null);
         SSLServerSocketFactory sslf = sslc.getServerSocketFactory();
+
         SSLServerSocket serverSocket;
-        serverSocket = (SSLServerSocket) sslf.createServerSocket(Integer.parseInt(arrInput[1]));
+        serverSocket = (SSLServerSocket) sslf.createServerSocket(Integer.parseInt(arrPortDetails[0]));
+
+        while (true) {
+            //////////SECURE/////////////////
+	    	if (false){
+                new HttpsServer(serverSocket.accept(), true).start();
+            }
+            /////////NOT SECURE//////////////
+            else{
+                ServerSocket httpServerSocket = new ServerSocket(Integer.parseInt(arrPortDetails[1]));
+
+                //Socket clientSocket;
+                //clientSocket = httpServerSocket.accept();
+
+                new HttpsServer(httpServerSocket.accept(), true).start();
+
+                //read in top line, if empty then wait for user request
+                //String strInput = in.readLine();
+                //if (strInput.isEmpty()){ continue; }
+
+
+            }
 
 
 
-
-
-
-	    while (true) {
-	    	new HttpsServer(serverSocket.accept()).start();
 	    }
    }
 
-	private Socket ssl;
-    public HttpsServer(Socket s) {
-        ssl = s;
+    private Socket reg;   //regular socket
+	private Socket ssl;   //ssl socket
+    //currently always true
+    public HttpsServer(Socket s, boolean bSecure) {
+        if (bSecure){ssl = s;}
+        else{ reg = s; }
     }
+
 
 	public void run() {
 
-	  try{
+        try{
             BufferedReader in = new BufferedReader(new InputStreamReader(ssl.getInputStream()));
             DataOutputStream out = new DataOutputStream(ssl.getOutputStream());
 
             //read in top line, if empty then wait for user request
             String strInput = in.readLine();
-            //if (strInput.isEmpty()){ 
+            //if (strInput.isEmpty()){
 	        //	continue; }
 
 
@@ -113,7 +131,7 @@ public class HttpsServer extends Thread {
             while ( (strInput = in.readLine()) != null){
                 //System.out.println(strInput); //printing out full request for debug purposes
 		if (strHeader.contains("Connection: keep-alive")){
-			continue;	
+			continue;
 		}
 
 
@@ -126,13 +144,13 @@ public class HttpsServer extends Thread {
 
             out.close();
             in.close();
-            ssl.close(); 
+            ssl.close();
 	  } catch (IOException ioe) {
                         //close connection
                 }
 
         }
-    
+
 
     //------------------------------------------------------------------------------
     //Methods to help build appropriate headers
@@ -197,7 +215,7 @@ public class HttpsServer extends Thread {
     public static String findRedirect(String strPathInput){
         String strRedirectPath = "";
         Scanner scanRedirect;
-        try {scanRedirect = new Scanner(new File("redirect.defs")); }
+        try {scanRedirect = new Scanner(new File("www/redirect.defs")); }
         catch(IOException e){
             System.out.println("redirect.defs file could not be found" + e.getMessage());
             return strRedirectPath; //send empty string (could not find file)
@@ -212,5 +230,27 @@ public class HttpsServer extends Thread {
         }
         return strRedirectPath; //no redirect path
     }
+
+
+    //Returns array of [SSLport#, ReguarlPort#]
+    public static String[] findPortNumbers(String[] arrInputOne, String[] arrInputTwo){
+        String[] arrPortDetails = new String[10];
+
+        if (arrInputOne[0].equals("--sslServerPort")){
+            arrPortDetails[0] = arrInputOne[1];
+            arrPortDetails[1] = arrInputTwo[1];
+        }
+        else{  //must be the regular port number
+            arrPortDetails[0] = arrInputTwo[1];
+            arrPortDetails[1] = arrInputOne[1];
+        }
+
+        //if either port is null, assign port 4444, and 5555 accordingly
+        if (arrPortDetails[0].equals("")){ arrPortDetails[0] = "4444";} //SSL Port
+        if (arrPortDetails[1].equals("")){ arrPortDetails[0] = "5555";} //Regular Port
+
+        return arrPortDetails;
+    }
+
 
 }
