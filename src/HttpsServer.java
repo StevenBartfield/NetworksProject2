@@ -115,7 +115,7 @@ public class HttpsServer extends Thread {
             //only retrieve if a GET file and not a redirect
             System.out.println(strHeader);
             System.out.println(strHeader.substring(9,12));
-            if (strRequestType.equals("GET ") && (!strHeader.substring(9,12).equals("301")) && (!strHeader.substring(9,12).equals("404")))    {
+            if (strRequestType.equals("GET ") && (!strHeader.substring(9,12).equals("301")))    {
                 try{
                     //get the file per the request and input it into the file stream
                     File fileRequested = new File(strPath);
@@ -126,7 +126,7 @@ public class HttpsServer extends Thread {
                     byte[] bytFile = new byte[nByteSize];  //putting the file into bytes
                     fileOutbound.read(bytFile);  //read the bytes into a new file to be sent out
 
-
+                    if (strHeader.substring(9,12).equals("404")){throw new Exception();}
 
                     //Transmit the data to client
                     out.write(bytFile, 0, nByteSize);
