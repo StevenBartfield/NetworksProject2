@@ -24,12 +24,8 @@ public class Server {
             Socket persist = null;
 
             Socket clientSocket;
-            if(persistent)
-                //serverSocket.accept();
-                clientSocket = persist;
-            else{
-                clientSocket = serverSocket.accept();
-            }
+            clientSocket = serverSocket.accept();
+
 
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
@@ -167,7 +163,7 @@ public class Server {
     public static String findRedirect(String strPathInput){
         String strRedirectPath = "";
         Scanner scanRedirect;
-        try {scanRedirect = new Scanner(new File("/redirect.defs")); }
+        try {scanRedirect = new Scanner(new File("www/redirect.defs")); }
         catch(IOException e){
             System.out.println("redirect.defs file could not be found" + e.getMessage());
             return strRedirectPath; //send empty string (could not find file)

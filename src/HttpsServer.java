@@ -45,46 +45,68 @@ public class HttpsServer extends Thread {
         httpServerSocket = new ServerSocket(Integer.parseInt(arrPortDetails[1]));
 
 
-        while (true) {
+        //while (true) {
             //create Secure socket
             //System.out.println("first hop");
             //bSecure = true;
-            Thread t = new Thread(new HttpsServer(serverSocket.accept()));
-            t.start();
-            Thread s = new Thread(new HttpsServer(httpServerSocket.accept()));
-            s.start();
-  	    }
+        //new HttpsServer(serverSocket).start();
+        new HttpsServer(httpServerSocket).start();
+        while (true){}
+
+//          Thread s = new Thread(new HttpsServer(httpServerSocket.accept()));
+//          s.start();
+        //}
+
+
     }
 
-	private Socket ssl;
-    public HttpsServer(Socket s) {
-        ssl = s;
+
+
+
+
+    private Socket ssl;
+    public HttpsServer(ServerSocket s) {
+        //ssl = s;
+        serverSocket = s;
     }
+    public static ServerSocket serverSocket;
 
-	public void run() {
+    public void run(){
 
-        try{
+        //------------------------------------------------------------------------------
+        //Setting up the sockets and defining variables
+        //------------------------------------------------------------------------------
 
-//            System.out.println("port = " + ssl.getLocalPort());
-//            //if secure in incorrect port (7777 is insecure), then return
-//            if (ssl.getLocalPort() == 7777 && bSecure ){
-//                System.out.println("Exit port 7777");
-//                return;
-//            }
-//            //if insecure in incorrect port (8888 is secure), then return
-//            if (ssl.getLocalPort() == 8888 && !bSecure){
-//                System.out.println("Exit port 8888");
-//                return;
-//            }
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(ssl.getInputStream()));
-            DataOutputStream out = new DataOutputStream(ssl.getOutputStream());
 
-            //read in top line, if empty then wait for user request
-            String strInput = in.readLine();
-            //if (strInput.isEmpty()){
-	        //	continue; }
+        while (true){    //will continue to look for requests
 
+            //ServerSocket serverSocket = new ServerSocket(Integer.parseInt(arrInput[1]));
+            String strInput = "";
+            boolean persistent = false;
+            Socket persist = null;
+            BufferedReader in = null;
+            DataOutputStream out = null;
+
+            Socket clientSocket;
+            try{
+
+                if(persistent)
+                    //serverSocket.accept();
+                    clientSocket = persist;
+                else{
+                    clientSocket = serverSocket.accept();
+                }
+
+
+                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                out = new DataOutputStream(clientSocket.getOutputStream());
+
+                //read in top line, if empty then wait for user request
+                strInput = in.readLine();
+            }
+            catch(Exception e){}
+            if (strInput.isEmpty()){ continue; }
 
             //------------------------------------------------------------------------------
             //Parsing out request and building the header file
@@ -92,30 +114,29 @@ public class HttpsServer extends Thread {
 
             //Parse out the requested file from the client request string
             String strRequestType = strInput.substring(0,4); //pulls the request out
-            String strPath = null;
+            String strPath = "www/";
 
             //check for request type and handle accordingly
             if (strRequestType.equals("GET ")){
-                strPath = strInput.substring(5, strInput.indexOf("HTTP") - 1);
+                strPath += strInput.substring(5, strInput.indexOf("HTTP") - 1);
             }
             if (strRequestType.equals("HEAD")){
-                strPath = strInput.substring(6, strInput.indexOf("HTTP") - 1);
+                strPath += strInput.substring(6, strInput.indexOf("HTTP") - 1);
             }
 
             //Create the header and send back to client
             String strHeader = createHeader(strPath, strRequestType);
-            out.writeBytes(strHeader + "\r\n");
-
-
+            try{
+                out.writeBytes(strHeader + "\r\n");
+            }
+            catch(Exception e){}
             //------------------------------------------------------------------------------
             //Handling the rest of the file request -- will fail if there is no file to be transmitted (404 was delivered)
             //------------------------------------------------------------------------------
+
             //only retrieve if a GET file and not a redirect
-            System.out.println(strHeader);
-            System.out.println(strHeader.substring(9,12));
             if (strRequestType.equals("GET ") && (!strHeader.substring(9,12).equals("301")))    {
                 try{
-                    System.out.println(strPath);
                     //get the file per the request and input it into the file stream
                     File fileRequested = new File(strPath);
                     FileInputStream fileOutbound = new FileInputStream(fileRequested);
@@ -125,36 +146,38 @@ public class HttpsServer extends Thread {
                     byte[] bytFile = new byte[nByteSize];  //putting the file into bytes
                     fileOutbound.read(bytFile);  //read the bytes into a new file to be sent out
 
-                    if (strHeader.substring(9,12).equals("404")){throw new Exception();}
-
                     //Transmit the data to client
                     out.write(bytFile, 0, nByteSize);
                 }catch(Exception e){
+                    try{
                     out.writeBytes("404. That's an Error! The requested URL was not found on this server. That's all we know.\r\n"); //for 404 requests //find out what should actually be written in the body for 404s.. if anything?
-                }
+                    }catch(Exception g){
+                    }
             }
 
             //Remove the rest of client's header from the buffer
-            while ( (strInput = in.readLine()) != null){
-                if (strHeader.contains("Connection: keep-alive")){
-                    continue;
+             try{
+                 while ( (strInput = in.readLine()) != null){
+                    //System.out.println(strInput); //printing out full request for debug purposes
+    //                if (strHeader.contains("Connection: keep-alive")){
+    //                    persistent = true;
+    //                    persist = clientSocket;
+    //                    continue;   //
+                    if (strInput.equals("") ){ break;} //breaks once the current request has ended
                 }
-                if (strInput.equals("") ){ break;} //breaks once the current request has ended
-            }
+             }catch(Exception e){}
 
             //------------------------------------------------------------------------------
             //Closing off the current connection
             //------------------------------------------------------------------------------
-
-            out.close();
-            in.close();
-            ssl.close();
-	  } catch (IOException ioe) {
-                        //close connection
-                }
-
+            try{
+                out.close();
+                in.close();
+                serverSocket.close();
+            }catch(Exception e){}
         }
-
+      }
+    }
 
     //------------------------------------------------------------------------------
     //Methods to help build appropriate headers
@@ -188,7 +211,7 @@ public class HttpsServer extends Thread {
 
 
         //check if file exists, if not then send 404
-        if (!fileRequested.exists() || strPathInput.equals("www/redirect.defs")){
+        if (!fileRequested.exists()){
             strHeader =  "HTTP/1.1 404 Not Found \r\n";
             strHeader += "Content-Length: 91 \r\n";
             strHeader += "Content-Type: text/html \r\n";
@@ -224,24 +247,16 @@ public class HttpsServer extends Thread {
             System.out.println("redirect.defs file could not be found" + e.getMessage());
             return strRedirectPath; //send empty string (could not find file)
         }   //only works if server in root
-        //System.out.println(strPathInput); //for debugging
-
-        try{strPathInput = strPathInput.subSequence(3,strPathInput.length()).toString();}
-        catch  (Exception e){}
 
         while (scanRedirect.hasNextLine()){
             String strRedirect = scanRedirect.nextLine();
             String[] strSplit = strRedirect.split(" ");
-
-            System.out.println(strPathInput);
-            System.out.println(strSplit[0]);
-            if (strSplit[0].equals(strPathInput)){    //added "/" as this is how file is formatted
+            if (strSplit[0].equals("/" + strPathInput)){    //added "/" as this is how file is formatted
                 return strSplit[1];
             }
         }
         return strRedirectPath; //no redirect path
     }
-
 
     //Returns array of [SSLport#, ReguarlPort#]
     public static String[] findPortNumbers(String[] arrInputOne, String[] arrInputTwo){
@@ -265,3 +280,5 @@ public class HttpsServer extends Thread {
 
 
 }
+
+
