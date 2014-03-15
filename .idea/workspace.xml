@@ -4,7 +4,7 @@
     <list default="true" id="821e4707-e7e6-4b8c-ac3d-71ac73bb13da" name="Default" comment="" />
     <ignored path="NetworksProject2.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/HttpsServer.java" changelist="821e4707-e7e6-4b8c-ac3d-71ac73bb13da" time="1394900681650" ignored="false" />
+    <file path="/HttpsServer.java" changelist="821e4707-e7e6-4b8c-ac3d-71ac73bb13da" time="1394901777397" ignored="false" />
     <file path="/Server.java" changelist="821e4707-e7e6-4b8c-ac3d-71ac73bb13da" time="1394814726557" ignored="false" />
     <file path="/HTTPServer.java" changelist="821e4707-e7e6-4b8c-ac3d-71ac73bb13da" time="1394829209035" ignored="false" />
     <file path="/test_client.py" changelist="821e4707-e7e6-4b8c-ac3d-71ac73bb13da" time="1394842953949" ignored="false" />
@@ -68,10 +68,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="HttpsServer.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="HttpsServer.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/HttpsServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="125" column="40" selection-start="5100" selection-end="5100" vertical-scroll-proportion="0.37871286">
+            <state line="47" column="39" selection-start="1768" selection-end="1768" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="n#!!doc" expanded="true" />
                 <element signature="imports" expanded="true" />
@@ -89,10 +89,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="test_client.py" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="test_client.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/test_client.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="70" column="37" selection-start="2166" selection-end="2166" vertical-scroll-proportion="0.0">
+            <state line="159" column="49" selection-start="4731" selection-end="4731" vertical-scroll-proportion="0.4232143">
               <folding />
             </state>
           </provider>
@@ -118,10 +118,10 @@
   </component>
   <component name="PhpWorkspaceProjectConfiguration" backward_compatibility_performed="true" />
   <component name="ProjectFrameBounds">
-    <option name="x" value="219" />
-    <option name="y" value="104" />
-    <option name="width" value="1110" />
-    <option name="height" value="601" />
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1382" />
+    <option name="height" value="744" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -307,7 +307,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="219" y="104" width="1110" height="601" extended-state="0" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -327,7 +327,7 @@
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1889313" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.15" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -470,6 +470,16 @@
         <state line="721" column="16" selection-start="26894" selection-end="26894" vertical-scroll-proportion="0.33214286" />
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/HttpsServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="47" column="39" selection-start="1768" selection-end="1768" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Server.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="21" column="34" selection-start="762" selection-end="762" vertical-scroll-proportion="0.0">
@@ -479,18 +489,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test_client.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="70" column="37" selection-start="2166" selection-end="2166" vertical-scroll-proportion="0.0">
+        <state line="159" column="49" selection-start="4731" selection-end="4731" vertical-scroll-proportion="0.4232143">
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/HttpsServer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="125" column="40" selection-start="5100" selection-end="5100" vertical-scroll-proportion="0.37871286">
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>

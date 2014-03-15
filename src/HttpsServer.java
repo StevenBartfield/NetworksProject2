@@ -225,11 +225,18 @@ public class HttpsServer extends Thread {
             System.out.println("redirect.defs file could not be found" + e.getMessage());
             return strRedirectPath; //send empty string (could not find file)
         }   //only works if server in root
+        //System.out.println(strPathInput); //for debugging
+
+        try{strPathInput = strPathInput.subSequence(3,strPathInput.length()).toString();}
+        catch  (Exception e){}
 
         while (scanRedirect.hasNextLine()){
             String strRedirect = scanRedirect.nextLine();
             String[] strSplit = strRedirect.split(" ");
-            if (strSplit[0].equals("/" + strPathInput)){    //added "/" as this is how file is formatted
+
+            System.out.println(strPathInput);
+            System.out.println(strSplit[0]);
+            if (strSplit[0].equals(strPathInput)){    //added "/" as this is how file is formatted
                 return strSplit[1];
             }
         }
