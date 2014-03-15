@@ -167,7 +167,7 @@ public class Server {
     public static String findRedirect(String strPathInput){
         String strRedirectPath = "";
         Scanner scanRedirect;
-        try {scanRedirect = new Scanner(new File("www/redirect.defs")); }
+        try {scanRedirect = new Scanner(new File("/redirect.defs")); }
         catch(IOException e){
             System.out.println("redirect.defs file could not be found" + e.getMessage());
             return strRedirectPath; //send empty string (could not find file)

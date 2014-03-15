@@ -37,6 +37,7 @@ public class HttpsServer extends Thread {
         sslc.init(kmf.getKeyManagers(), null, null);
         SSLServerSocketFactory sslf = sslc.getServerSocketFactory();
 
+
         SSLServerSocket serverSocket;
         serverSocket = (SSLServerSocket) sslf.createServerSocket(Integer.parseInt(arrPortDetails[0]));
 
@@ -48,13 +49,10 @@ public class HttpsServer extends Thread {
             //create Secure socket
             //System.out.println("first hop");
             //bSecure = true;
-            new HttpsServer(serverSocket.accept()).start();
-            //System.out.println("second hop");
-
-
-            //create regular socket
-            //bSecure = false;
-            //new HttpsServer(httpServerSocket.accept()).start();
+            Thread t = new Thread(new HttpsServer(serverSocket.accept()));
+            t.start();
+            Thread s = new Thread(new HttpsServer(httpServerSocket.accept()));
+            s.start();
   	    }
     }
 
@@ -117,6 +115,7 @@ public class HttpsServer extends Thread {
             System.out.println(strHeader.substring(9,12));
             if (strRequestType.equals("GET ") && (!strHeader.substring(9,12).equals("301")))    {
                 try{
+                    System.out.println(strPath);
                     //get the file per the request and input it into the file stream
                     File fileRequested = new File(strPath);
                     FileInputStream fileOutbound = new FileInputStream(fileRequested);
