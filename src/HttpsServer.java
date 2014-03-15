@@ -12,6 +12,8 @@ import javax.net.ssl.*;
 
 public class HttpsServer extends Thread {
 
+    public static boolean bSecure;
+
     public static void main(String[] args) throws Exception {
 
         //------------------------------------------------------------------------------
@@ -43,21 +45,39 @@ public class HttpsServer extends Thread {
 
         while (true) {
             //create Secure socket
+            //System.out.println("first hop");
+            //bSecure = true;
             new HttpsServer(serverSocket.accept()).start();
+            //System.out.println("second hop");
+
+
             //create regular socket
+            //bSecure = false;
             new HttpsServer(httpServerSocket.accept()).start();
   	    }
-   }
+    }
 
 	private Socket ssl;
     public HttpsServer(Socket s) {
         ssl = s;
     }
 
-
 	public void run() {
 
         try{
+
+//            System.out.println("port = " + ssl.getLocalPort());
+//            //if secure in incorrect port (7777 is insecure), then return
+//            if (ssl.getLocalPort() == 7777 && bSecure ){
+//                System.out.println("Exit port 7777");
+//                return;
+//            }
+//            //if insecure in incorrect port (8888 is secure), then return
+//            if (ssl.getLocalPort() == 8888 && !bSecure){
+//                System.out.println("Exit port 8888");
+//                return;
+//            }
+
             BufferedReader in = new BufferedReader(new InputStreamReader(ssl.getInputStream()));
             DataOutputStream out = new DataOutputStream(ssl.getOutputStream());
 
@@ -112,12 +132,10 @@ public class HttpsServer extends Thread {
 
             //Remove the rest of client's header from the buffer
             while ( (strInput = in.readLine()) != null){
-                //System.out.println(strInput); //printing out full request for debug purposes
-		if (strHeader.contains("Connection: keep-alive")){
-			continue;
-		}
-
-
+                System.out.println(strInput); //printing out full request for debug purposes
+                if (strHeader.contains("Connection: keep-alive")){
+                    continue;
+                }
                 if (strInput.equals("") ){ break;} //breaks once the current request has ended
             }
 
