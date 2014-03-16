@@ -1,5 +1,11 @@
+import javax.net.ServerSocketFactory;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 import java.io.*;
 import java.net.*;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -32,6 +38,14 @@ public final class Server {
         System.out.println("Server bound and listening to port " + serverPort);
     }
 
+    //do an SSL Bind
+    public void sslBind() throws Exception{
+        //Get SSL credentials
+        SSLServerSocketFactory sslf = getSSLF();
+        //SSLServerSocket serverSocket;
+        socket = (SSLServerSocket) sslf.createServerSocket(serverPort);
+    }
+
     /**
      * Waits for a client to connect, and then sets up stream objects for communication
      * in both directions.
@@ -54,7 +68,6 @@ public final class Server {
             System.out.println("IOException in socket.accept()");
             return null;
         }
-
         try {
             toClientStream = new DataOutputStream(clientSocket.getOutputStream());
             fromClientStream = new DataInputStream(clientSocket.getInputStream());
@@ -69,10 +82,11 @@ public final class Server {
         String inputLine;
         do {
             inputLine = fromClientStream.readLine();
-            //if (inputLine == null) {
-            //	System.out.println("inputLine was null!\n");
-            //		break;
-            //	}
+            //if statement was commented out
+//            if (inputLine == null) {
+//				System.out.println("inputLine was null!\n");
+//				break;
+//			}
             rawRequest.add(inputLine);
         } while ((inputLine != null) && (inputLine.length() > 0));
 
@@ -160,6 +174,7 @@ public final class Server {
                 .append("Connection: close\r\n")
                 .append(String.format("Content-Length: %d\r\n", content.length));
         toClientStream.writeBytes(response.toString());
+        //toClientStream.writeBytes("\r\n"); //moved to be above
         if (request.getType() == HTTPRequest.Command.GET) {
             toClientStream.writeBytes("\r\n");
             ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();
@@ -168,39 +183,93 @@ public final class Server {
         }
     }
 
-    public static void main(String argv[]) {
+    public static SSLServerSocketFactory getSSLF() throws Exception{
+        //Runs the HTTPs server stuff.
+        SSLContext sslc = SSLContext.getInstance("TLS");
+        char [] pswd = "testing".toCharArray();
+        KeyStore ks = KeyStore.getInstance("JKS");
+        FileInputStream fin = new FileInputStream("server.jks");
+        ks.load(fin,pswd);
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+        kmf.init(ks, pswd);
+        sslc.init(kmf.getKeyManagers(), null, null);
+        SSLServerSocketFactory sslf = sslc.getServerSocketFactory();
+        return sslf;
+    }
+
+
+    public static void main(String argv[]) throws Exception {
         Map<String, String> flags = Utils.parseCmdlineFlags(argv);
         if (!flags.containsKey("--serverPort")) {
-            System.out.println("usage: Server --serverPort=12345");
+            System.out.println("usage: Server --serverPort=12345 --sslServerPort=54321");
+            System.exit(-1);
+        }
+        //added for ssl server port
+        if (!flags.containsKey("--sslServerPort")) {
+            System.out.println("usage: Server --serverPort=12345 --sslServerPort=54321");
             System.exit(-1);
         }
 
         int serverPort = -1;
+        int sslServerPort = -1; //added port number
         try {
             serverPort = Integer.parseInt(flags.get("--serverPort"));
+            sslServerPort = Integer.parseInt(flags.get("--sslServerPort")); //added for ssl port number
         } catch (NumberFormatException e) {
             System.out.println("Invalid port number! Must be an integer.");
             System.exit(-1);
         }
 
         Server server = new Server(serverPort);
+        Server sslServer = new Server(sslServerPort);  //adds new server port
+
         try {
             server.loadResources();
+            sslServer.loadResources(); //load resources for new server
+
             server.bind();
+            sslServer.sslBind();   //binds ssl port to server
+
+
+
             while(true) {
+
                 Socket clientSocket = server.acceptFromClient();
+                clientSocket.setSoTimeout(1000000); //set timer to be large, always keep alive
+
                 if (clientSocket != null && clientSocket.isConnected()) {
                     try {
                         server.handleRequest();
                     } catch (IOException e) {
                         System.out.println("IO exception handling request, continuing.");
                     }
-                    try {
-                        clientSocket.close();
-                    } catch (IOException e) {
-                        System.out.println("it's ok; the server already closed the connection.");
-                    }
+
+//					try {
+//                        if (clientSocket.getSoTimeout() < 0) {
+//                            clientSocket.close();
+//                        }
+//					} catch (IOException e) {
+//						System.out.println("it's ok; the server already closed the connection.");
+//					}
                 }
+
+                //creates a ssl client socket
+
+//                Socket sslclientSocket = sslServer.acceptFromClient(); ///added client socket
+//
+//                if (sslclientSocket != null && sslclientSocket.isConnected()) {
+//                    try {
+//                        sslServer.handleRequest();
+//                    } catch (IOException e) {
+//                        System.out.println("IO exception handling request, continuing.");
+//                    }
+////                    try {
+////                        sslclientSocket.close();
+////                    } catch (IOException e) {
+////                        System.out.println("it's ok; the server already closed the connection.");
+////                    }
+//                }
+
             }
         } catch (IOException e) {
             System.out.println("Error communicating with client. aborting. Details: " + e);
