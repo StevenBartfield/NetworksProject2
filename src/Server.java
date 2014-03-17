@@ -276,7 +276,7 @@ public final class Server implements Runnable {
                 if (clientSocket != null && clientSocket.isConnected()) {
 
                     //if server wants to keep alive, else handle just one request
-                    for (int nC = 0; nC < nPersistentConnections; nC++){
+                    for (int nC = 0; nC < 20; nC++){
                         try {
                             server.handleRequest();
                             if (!server.bKeepAlive){break;} //not persistent, so collapse

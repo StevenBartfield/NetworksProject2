@@ -5,7 +5,7 @@
     <ignored path="NetworksProject2.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/HttpsServer.java" changelist="821e4707-e7e6-4b8c-ac3d-71ac73bb13da" time="1394917319418" ignored="false" />
-    <file path="/Server.java" changelist="821e4707-e7e6-4b8c-ac3d-71ac73bb13da" time="1395076502999" ignored="false" />
+    <file path="/Server.java" changelist="821e4707-e7e6-4b8c-ac3d-71ac73bb13da" time="1395095469226" ignored="false" />
     <file path="/HTTPServer.java" changelist="821e4707-e7e6-4b8c-ac3d-71ac73bb13da" time="1394829209035" ignored="false" />
     <file path="/test_client.py" changelist="821e4707-e7e6-4b8c-ac3d-71ac73bb13da" time="1394917432839" ignored="false" />
     <file path="$PROJECT_DIR$/../NewNetworks/src/Server.java" changelist="821e4707-e7e6-4b8c-ac3d-71ac73bb13da" time="1395011220007" ignored="false" />
@@ -76,7 +76,7 @@
       <file leaf-file-name="Server.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Server.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="17" column="75" selection-start="501" selection-end="501" vertical-scroll-proportion="0.27321428">
+            <state line="253" column="77" selection-start="10079" selection-end="10079" vertical-scroll-proportion="0.119642854">
               <folding />
             </state>
           </provider>
@@ -85,7 +85,7 @@
       <file leaf-file-name="test_client.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test_client.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="21" column="76" selection-start="722" selection-end="722" vertical-scroll-proportion="0.0">
+            <state line="168" column="33" selection-start="4971" selection-end="4971" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -453,13 +453,6 @@
         <state line="721" column="16" selection-start="26894" selection-end="26894" vertical-scroll-proportion="0.33214286" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test_client.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="21" column="76" selection-start="722" selection-end="722" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://C:/Program Files/java/jdk1.7.0_40/src.zip!/java/lang/String.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="2741" column="48" selection-start="109317" selection-end="109317" vertical-scroll-proportion="0.030357143">
@@ -467,9 +460,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/test_client.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="168" column="33" selection-start="4971" selection-end="4971" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Server.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="75" selection-start="501" selection-end="501" vertical-scroll-proportion="0.27321428">
+        <state line="253" column="77" selection-start="10079" selection-end="10079" vertical-scroll-proportion="0.119642854">
           <folding />
         </state>
       </provider>
