@@ -166,8 +166,8 @@ if __name__  == '__main__':
 	print 'HTTP tests!'
 	NonPersistentTestRunner(host, port, 'http').run_all_tests()
 
-	# print '\n\nHTTPS tests!'
-	# NonPersistentTestRunner(host, sslport, 'https').run_all_tests()
+	print '\n\nHTTPS tests!'
+	NonPersistentTestRunner(host, sslport, 'https').run_all_tests()
 
 	print '\n\nPersistent tests!'
 	PersistentTestRunner(host, port).test_200()

@@ -8,7 +8,7 @@ import java.security.*;
 import javax.net.*;
 import javax.net.ssl.*;
 
-public final class Server {
+public final class Server implements Runnable {
     private final int serverPort;
     private Map<String, byte[]> resourceMap;
     private Map<String, String> redirectMap;
@@ -17,9 +17,13 @@ public final class Server {
     private DataInputStream fromClientStream;
 
     private boolean bKeepAlive = true;
+    private boolean bSSL;
 
-    public Server(int serverPort) {
+    public static long test = 0;
+
+    public Server(int serverPort, boolean bSSL) {
         this.serverPort = serverPort;
+        this.bSSL = bSSL;
     }
 
     public void loadResources() throws IOException {
@@ -226,14 +230,78 @@ public final class Server {
             System.exit(-1);
         }
 
-        Server server = new Server(serverPort);
 
+        //Server server = new Server(serverPort);
+
+//        Thread t = new Thread(new Server(serverPort, false));
+//        t.start();
+//        Thread s = new Thread(new Server(serverPort+1, true));//ssl port = reg port + 1
+//        s.start();
+
+        Runnable r = new Server(serverPort, false);
+        //new Thread(r).start();
+        Thread k = new Thread(r);
+        test = k.getId();
+        k.start();
+
+        Runnable s = new Server(serverPort+1, true);   //ssl port
+        new Thread(s).start();
+
+
+
+
+//        try {
+//            server.loadResources();
+//
+//            server.bindSSL();
+//            //server.bind();
+//
+//            while(true) {
+//                Socket clientSocket = server.acceptFromClient();
+//                int nPersistentConnections = 20;
+//                clientSocket.setSoTimeout(2000000);
+//
+//                if (clientSocket != null && clientSocket.isConnected()) {
+//
+//                    //if server wants to keep alive, else handle just one request
+//                    for (int nC = 0; nC < nPersistentConnections; nC++){
+//                        try {
+//                            server.handleRequest();
+//                            if (!server.bKeepAlive){break;} //not persistent, so collapse
+//                        } catch (IOException e) {}
+//                    }
+//                    try {
+//                        clientSocket.close();
+//                    } catch (IOException e) {
+//                        System.out.println("it's ok; the server already closed the connection.");
+//                    }
+//                }
+//
+//            }
+//        } catch (IOException e) {
+//            System.out.println("Error communicating with client. aborting. Details: " + e);
+//        }
+    }
+
+    @Override
+    public void run() {
         try {
-            server.loadResources();
+            Server server;
 
-            //server.bindSSL();
-            server.bind();
+            long threadID = Thread.currentThread().getId();
+            System.out.println(threadID);
 
+            if (threadID == test){
+                System.out.println(test);
+                server = new Server(serverPort, false);    //reg server
+                server.loadResources();
+                server.bind();
+            }
+            else{
+                server = new Server(serverPort+1, true);   //SSL server
+                server.loadResources();
+                server.bindSSL();
+            }
 
             while(true) {
                 Socket clientSocket = server.acceptFromClient();
@@ -247,8 +315,13 @@ public final class Server {
                         try {
                             server.handleRequest();
                             if (!server.bKeepAlive){break;} //not persistent, so collapse
+                            //if (bSSL){break;} //not regular, so collapse
                         } catch (IOException e) {}
                     }
+//                    try {
+//                         server.handleRequest();
+//                    } catch (IOException e) {}
+
                     try {
                         clientSocket.close();
                     } catch (IOException e) {
@@ -260,6 +333,10 @@ public final class Server {
         } catch (IOException e) {
             System.out.println("Error communicating with client. aborting. Details: " + e);
         }
-    }
+
+    }//end run method
+
+
+
 }
 
