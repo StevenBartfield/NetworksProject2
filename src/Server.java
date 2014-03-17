@@ -57,7 +57,7 @@ public final class Server implements Runnable {
             SSLServerSocketFactory sslf = sslc.getServerSocketFactory();
             SSLServerSocket serverSocket;
             socket = (SSLServerSocket) sslf.createServerSocket(serverPort);
-            System.out.println("Server bound and listening to port " + serverPort);
+            System.out.println("SSL Server bound and listening to port " + serverPort);
         } catch (Exception e) {
             System.out.println("Exception");
         }
@@ -271,6 +271,7 @@ public final class Server implements Runnable {
                 Socket clientSocket = server.acceptFromClient();
                 int nPersistentConnections = 20;
                 clientSocket.setSoTimeout(2000000);
+
 
                 if (clientSocket != null && clientSocket.isConnected()) {
 
