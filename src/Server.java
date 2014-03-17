@@ -16,6 +16,8 @@ public final class Server {
     private DataOutputStream toClientStream;
     private DataInputStream fromClientStream;
 
+    private boolean bKeepAlive = true;
+
     public Server(int serverPort) {
         this.serverPort = serverPort;
     }
@@ -104,12 +106,21 @@ public final class Server {
 
         } while ((inputLine != null) && (inputLine.length() > 0));
 
-        System.out.println(String.format("[%s]", rawRequest));
+        //System.out.println(String.format("[%s]", rawRequest));
         HTTPRequest request = new HTTPRequest(rawRequest);
-        System.out.println(request);
 
 
-
+        //Added this line to only print if real request
+        String strRequest = request.toString();
+        //checks to see if persistant
+        bKeepAlive = false; //reinitialize
+        if (strRequest.contains("Keep-Alive")){
+            bKeepAlive = true;
+        }
+        //if there is a request, will print it out
+        if (strRequest.length() != 0){
+            System.out.println(strRequest);
+        }
 
 
         // TODO(ajn): support POST along with GET/HEAD
@@ -216,6 +227,7 @@ public final class Server {
         }
 
         Server server = new Server(serverPort);
+
         try {
             server.loadResources();
 
@@ -224,38 +236,25 @@ public final class Server {
 
 
             while(true) {
-
-                System.out.println("pop");
                 Socket clientSocket = server.acceptFromClient();
-                //clientSocket.setKeepAlive(true);
-                //clientSocket.setSoTimeout(2000000);
-                System.out.println("hop");
+                int nPersistentConnections = 20;
+                clientSocket.setSoTimeout(2000000);
 
                 if (clientSocket != null && clientSocket.isConnected()) {
-                    try {
-                        server.handleRequest();
-                    } catch (IOException e) {
-                        System.out.println("IO exception handling request, continuing.");
-                    }
 
-                    System.out.println("slop");
-                    try {
-                        server.handleRequest();
-                    } catch (IOException e) {
-                        System.out.println("IO exception handling request, continuing.");
+                    //if server wants to keep alive, else handle just one request
+                    for (int nC = 0; nC < nPersistentConnections; nC++){
+                        try {
+                            server.handleRequest();
+                            if (!server.bKeepAlive){break;} //not persistent, so collapse
+                        } catch (IOException e) {}
                     }
-                    System.out.println("flop");
-//                    try {
-//                        clientSocket.close();
-//                    } catch (IOException e) {
-//                        System.out.println("it's ok; the server already closed the connection.");
-//                    }
+                    try {
+                        clientSocket.close();
+                    } catch (IOException e) {
+                        System.out.println("it's ok; the server already closed the connection.");
+                    }
                 }
-//
-//              while (clientSocket.getSoTimeout() > 0){
-//                  server.handleRequest();
-//              }
-                //server.handleRequest();
 
             }
         } catch (IOException e) {

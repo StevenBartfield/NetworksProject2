@@ -163,11 +163,11 @@ if __name__  == '__main__':
 	port = arg_map['--port']
 	sslport = arg_map['--sslport']
 
-	# print 'HTTP tests!'
-	# NonPersistentTestRunner(host, port, 'http').run_all_tests()
+	print 'HTTP tests!'
+	NonPersistentTestRunner(host, port, 'http').run_all_tests()
 
-	print '\n\nHTTPS tests!'
-	NonPersistentTestRunner(host, sslport, 'https').run_all_tests()
+	# print '\n\nHTTPS tests!'
+	# NonPersistentTestRunner(host, sslport, 'https').run_all_tests()
 
 	print '\n\nPersistent tests!'
 	PersistentTestRunner(host, port).test_200()
