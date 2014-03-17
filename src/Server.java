@@ -16,14 +16,17 @@ public final class Server implements Runnable {
     private DataOutputStream toClientStream;
     private DataInputStream fromClientStream;
 
+    //keeps track if asking for persistant connection
     private boolean bKeepAlive = true;
-    private boolean bSSL;
+    //global variable for tracking first thread id
+    public static long lFirstThreadID;
+    public static int nServerPort;
+    public static int nSSLServerPort;
 
-    public static long test = 0;
 
-    public Server(int serverPort, boolean bSSL) {
+
+    public Server(int serverPort) {
         this.serverPort = serverPort;
-        this.bSSL = bSSL;
     }
 
     public void loadResources() throws IOException {
@@ -100,12 +103,6 @@ public final class Server implements Runnable {
         String inputLine;
         do {
             inputLine = fromClientStream.readLine();
-
-            //if (inputLine == null) {
-            //	System.out.println("inputLine was null!\n");
-            //		break;
-            //	}
-
             rawRequest.add(inputLine);
 
         } while ((inputLine != null) && (inputLine.length() > 0));
@@ -218,91 +215,58 @@ public final class Server implements Runnable {
     public static void main(String argv[]) {
         Map<String, String> flags = Utils.parseCmdlineFlags(argv);
         if (!flags.containsKey("--serverPort")) {
-            System.out.println("usage: Server --serverPort=12345");
+            System.out.println("usage: Server --serverPort=12345 --sslServerPort=54321");
+            System.exit(-1);
+        }
+        if (!flags.containsKey("--sslServerPort")) {
+            System.out.println("usage: Server --serverPort=12345 --sslServerPort=54321");
             System.exit(-1);
         }
 
         int serverPort = -1;
+        int sslServerPort = -1;
         try {
             serverPort = Integer.parseInt(flags.get("--serverPort"));
+            sslServerPort = Integer.parseInt(flags.get("--sslServerPort"));
+            nServerPort = serverPort; //assign regular server port for thread
+            nSSLServerPort = sslServerPort; //assign regular server port for thread
         } catch (NumberFormatException e) {
             System.out.println("Invalid port number! Must be an integer.");
             System.exit(-1);
         }
 
-
-        //Server server = new Server(serverPort);
-
-//        Thread t = new Thread(new Server(serverPort, false));
-//        t.start();
-//        Thread s = new Thread(new Server(serverPort+1, true));//ssl port = reg port + 1
-//        s.start();
-
-        Runnable r = new Server(serverPort, false);
-        //new Thread(r).start();
+        //Create, Assign, and Start first thread
+        Runnable r = new Server(serverPort); //regular port
         Thread k = new Thread(r);
-        test = k.getId();
+        lFirstThreadID = k.getId();
         k.start();
 
-        Runnable s = new Server(serverPort+1, true);   //ssl port
+        //Create and Start second thread
+        Runnable s = new Server(sslServerPort);   //ssl port
         new Thread(s).start();
-
-
-
-
-//        try {
-//            server.loadResources();
-//
-//            server.bindSSL();
-//            //server.bind();
-//
-//            while(true) {
-//                Socket clientSocket = server.acceptFromClient();
-//                int nPersistentConnections = 20;
-//                clientSocket.setSoTimeout(2000000);
-//
-//                if (clientSocket != null && clientSocket.isConnected()) {
-//
-//                    //if server wants to keep alive, else handle just one request
-//                    for (int nC = 0; nC < nPersistentConnections; nC++){
-//                        try {
-//                            server.handleRequest();
-//                            if (!server.bKeepAlive){break;} //not persistent, so collapse
-//                        } catch (IOException e) {}
-//                    }
-//                    try {
-//                        clientSocket.close();
-//                    } catch (IOException e) {
-//                        System.out.println("it's ok; the server already closed the connection.");
-//                    }
-//                }
-//
-//            }
-//        } catch (IOException e) {
-//            System.out.println("Error communicating with client. aborting. Details: " + e);
-//        }
     }
+
 
     @Override
     public void run() {
         try {
-            Server server;
+            Server server; //server to be instantiated
 
-            long threadID = Thread.currentThread().getId();
-            System.out.println(threadID);
+            long threadID = Thread.currentThread().getId(); //find the current thread ID
 
-            if (threadID == test){
-                System.out.println(test);
-                server = new Server(serverPort, false);    //reg server
+            if (threadID == lFirstThreadID){
+                System.out.println(lFirstThreadID);
+                server = new Server(nServerPort);    //reg server
                 server.loadResources();
                 server.bind();
             }
             else{
-                server = new Server(serverPort+1, true);   //SSL server
+                server = new Server(nSSLServerPort);   //SSL server
                 server.loadResources();
                 server.bindSSL();
             }
 
+            //Continue looking for connections
             while(true) {
                 Socket clientSocket = server.acceptFromClient();
                 int nPersistentConnections = 20;
@@ -315,13 +279,8 @@ public final class Server implements Runnable {
                         try {
                             server.handleRequest();
                             if (!server.bKeepAlive){break;} //not persistent, so collapse
-                            //if (bSSL){break;} //not regular, so collapse
                         } catch (IOException e) {}
                     }
-//                    try {
-//                         server.handleRequest();
-//                    } catch (IOException e) {}
-
                     try {
                         clientSocket.close();
                     } catch (IOException e) {
@@ -336,7 +295,5 @@ public final class Server implements Runnable {
 
     }//end run method
 
-
-
-}
+}//end class
 
